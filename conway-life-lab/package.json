@@ -1,0 +1,14 @@
+{
+  "name": "conway-life-lab",
+  "version": "0.1.0",
+  "private": false,
+  "description": "A dependency-free, interactive Conway's Game of Life lab with a tested simulation engine.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

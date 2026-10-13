@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="Explore Conway's Game of Life in an interactive, dependency-free cellular automaton lab.">
+  <title>Conway Life Lab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Conway Life Lab home">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        <span class="brand-copy"><strong>CONWAY</strong><small>LIFE LAB</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="version-pill">v0.1.0</span>
+        <a class="text-link" href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank" rel="noreferrer">How it works <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro-row">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-dot"></span> CELLULAR AUTOMATON PLAYGROUND</p>
+          <h1>Simple rules.<br><span class="gradient-text">Unexpected worlds.</span></h1>
+          <p class="intro-copy">Build patterns, evolve generations, and explore how complexity can emerge from four simple rules.</p>
+        </div>
+        <div class="rule-card" aria-label="Rules of the Game of Life">
+          <p class="card-kicker">THE RULES</p>
+          <div class="rule-item"><span class="rule-symbol survival">2–3</span><span><strong>Survive</strong><small>A live cell with 2 or 3 neighbours lives on.</small></span></div>
+          <div class="rule-item"><span class="rule-symbol birth">3</span><span><strong>Birth</strong><small>A dead cell with exactly 3 neighbours becomes alive.</small></span></div>
+          <div class="rule-item"><span class="rule-symbol death">0–1 / 4+</span><span><strong>Otherwise, die</strong><small>Too few or too many neighbours ends a cell's life.</small></span></div>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Simulation workspace">
+        <aside class="control-panel">
+          <div class="panel-heading"><span class="section-number">01</span><h2>Experiment controls</h2></div>
+
+          <div class="run-controls">
+            <button id="playButton" class="button button-primary" type="button"><span class="button-icon" aria-hidden="true">▶</span> Run simulation</button>
+            <button id="stepButton" class="button button-secondary" type="button"><span aria-hidden="true">▷|</span> Step</button>
+          </div>
+
+          <div class="control-group">
+            <label class="field-label" for="patternSelect">Starting pattern</label>
+            <div class="select-wrap"><select id="patternSelect">
+              <option value="r-pentomino">R-pentomino · chaotic</option>
+              <option value="glider">Glider · moving</option>
+              <option value="gosper-gun">Gosper glider gun · generator</option>
+              <option value="pulsar">Pulsar · oscillator</option>
+              <option value="blinker">Blinker · period 2</option>
+              <option value="toad">Toad · period 2</option>
+              <option value="beacon">Beacon · period 2</option>
+            </select><span aria-hidden="true">⌄</span></div>
+            <button id="loadPatternButton" class="button button-outline button-full" type="button">Load pattern</button>
+          </div>
+
+          <div class="control-group">
+            <div class="label-line"><label class="field-label" for="speedInput">Simulation speed</label><output id="speedOutput" for="speedInput">8 gen/s</output></div>
+            <input id="speedInput" class="range-input" type="range" min="1" max="20" step="1" value="8">
+            <div class="range-captions"><span>Slow</span><span>Fast</span></div>
+          </div>
+
+          <div class="control-group">
+            <div class="label-line"><label class="field-label" for="densityInput">Random fill density</label><output id="densityOutput" for="densityInput">22%</output></div>
+            <input id="densityInput" class="range-input" type="range" min="5" max="60" step="1" value="22">
+            <div class="range-captions"><span>Sparse</span><span>Dense</span></div>
+            <button id="randomButton" class="button button-outline button-full" type="button">↻ Randomize board</button>
+          </div>
+
+          <div class="control-group compact-group">
+            <label class="field-label" for="sizeSelect">Board size</label>
+            <div class="select-wrap"><select id="sizeSelect">
+              <option value="20">20 × 20</option>
+              <option value="30">30 × 30</option>
+              <option value="40" selected>40 × 40</option>
+              <option value="50">50 × 50</option>
+              <option value="60">60 × 60</option>
+              <option value="80">80 × 80</option>
+            </select><span aria-hidden="true">⌄</span></div>
+          </div>
+
+          <label class="toggle-row" for="wrapInput">
+            <span><strong>Wrap board edges</strong><small>Opposite edges become neighbours</small></span>
+            <input id="wrapInput" type="checkbox">
+            <span class="toggle-ui" aria-hidden="true"></span>
+          </label>
+
+          <div class="panel-divider"></div>
+          <div class="utility-row">
+            <button id="clearButton" class="button button-quiet" type="button">Clear board</button>
+            <button id="exportButton" class="button button-quiet" type="button">Export state ↓</button>
+            <button id="importButton" class="button button-quiet" type="button">Import state ↑</button>
+            <input id="importFile" type="file" accept="application/json,.json" hidden>
+          </div>
+          <p id="notice" class="notice" role="status" aria-live="polite">Click any cell to toggle it. Press Space to run or pause.</p>
+        </aside>
+
+        <section class="simulation-panel" aria-label="Game board">
+          <div class="simulation-header">
+            <div class="simulation-title"><span class="live-indicator" id="liveIndicator"></span><div><h2>Live simulation</h2><p id="runStatus">Paused · Ready to evolve</p></div></div>
+            <div class="board-badge"><span class="badge-dot"></span><span id="boardSizeLabel">40 × 40 GRID</span></div>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas id="lifeCanvas" width="640" height="640" aria-label="Interactive Game of Life grid. Click cells to turn them on or off." tabindex="0"></canvas>
+            <div class="canvas-corner corner-tl" aria-hidden="true"></div><div class="canvas-corner corner-tr" aria-hidden="true"></div>
+            <div class="canvas-corner corner-bl" aria-hidden="true"></div><div class="canvas-corner corner-br" aria-hidden="true"></div>
+          </div>
+          <p class="board-hint"><span aria-hidden="true">⌖</span> Click or tap cells to edit the current generation</p>
+
+          <div class="stats-grid" aria-label="Simulation statistics">
+            <div class="stat-card"><span class="stat-icon generation-icon" aria-hidden="true">↗</span><span class="stat-label">GENERATION</span><strong id="generationCount">0</strong><small>Evolution steps</small></div>
+            <div class="stat-card"><span class="stat-icon alive-icon" aria-hidden="true">▦</span><span class="stat-label">LIVE CELLS</span><strong id="aliveCount">0</strong><small id="alivePercent">0% of board</small></div>
+            <div class="stat-card"><span class="stat-icon density-icon" aria-hidden="true">◌</span><span class="stat-label">POPULATION</span><strong id="populationState">Empty</strong><small id="populationHint">Add some life to begin</small></div>
+          </div>
+
+          <div class="bottom-toolbar"><div class="keyboard-hint"><kbd>SPACE</kbd><span>Run / pause</span><kbd>N</kbd><span>Next generation</span></div><div class="engine-label"><span class="engine-dot"></span> PURE JS ENGINE</div></div>
+        </section>
+      </section>
+
+      <section class="pattern-strip">
+        <div><p class="eyebrow">PATTERN LIBRARY</p><h2>Start with a little structure.</h2><p>Load a known pattern, then observe what the rules do to it.</p></div>
+        <div class="pattern-chips">
+          <button class="pattern-chip" type="button" data-pattern="glider"><span class="mini-pattern glider-mini" aria-hidden="true"></span><span><strong>Glider</strong><small>Moves across the board</small></span><span class="chip-arrow">↗</span></button>
+          <button class="pattern-chip" type="button" data-pattern="pulsar"><span class="mini-pattern pulsar-mini" aria-hidden="true"></span><span><strong>Pulsar</strong><small>Repeats every 3 steps</small></span><span class="chip-arrow">↗</span></button>
+          <button class="pattern-chip" type="button" data-pattern="gosper-gun"><span class="mini-pattern gun-mini" aria-hidden="true"></span><span><strong>Gosper gun</strong><small>Emits travelling gliders</small></span><span class="chip-arrow">↗</span></button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer"><span>CONWAY LIFE LAB <span class="footer-muted">· Open source cellular automaton</span></span><span class="footer-muted">Built for curiosity, tested by rules.</span></footer>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
